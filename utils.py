@@ -93,6 +93,9 @@ def crawl(main_url, search_params, num_pages):
     return pages_content
 
 
+websites_dict = {"sapo": "https://casa.sapo.pt/"}
+
+
 def scrape_sapo(main_url, sapo_page_contents):
     """ """
 

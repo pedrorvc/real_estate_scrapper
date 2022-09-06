@@ -9,6 +9,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 
+import os
+import argparse
+
 
 options = Options()
 # options.add_argument("--headless")
@@ -109,3 +112,127 @@ with open("houses.csv", "w", encoding="UTF8", newline="") as f:
 
     # write the data
     writer.writerows(export_data)
+
+
+def main(
+    main_url, purpose, type_of_property, location, number_of_rooms, min_price, max_price, pages, output_directory, cpu
+):
+
+    if not os.path.isdir(output_directory):
+        os.mkdir(output_directory)
+
+    pass
+
+
+def parse_arguments():
+
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    parser.add_argument(
+        "-w",
+        "--website",
+        type=str,
+        required=True,
+        choices=[
+            "sapo",
+        ],
+        nargs="+",
+        default="sapo",
+        dest="websites",
+        help="Choose websites to scrape.",
+    )
+
+    parser.add_argument(
+        "-p",
+        "--purpose",
+        type=str,
+        required=True,
+        choices=[
+            "buy",
+            "rent",
+        ],
+        dest="purpose",
+        help="Purpose of the search.",
+    )
+
+    parser.add_argument(
+        "-t",
+        "--type",
+        type=str,
+        required=True,
+        choices=[
+            "apartment",
+            "house",
+            "land",
+            "shop",
+            "building",
+        ],
+        dest="type_of_property",
+        help="Type of property to search for.",
+    )
+
+    parser.add_argument(
+        "-l",
+        "--location",
+        type=str,
+        required=True,
+        dest="location",
+        help="Location of the property.",
+    )
+
+    parser.add_argument(
+        "-r",
+        "--rooms",
+        type=int,
+        required=False,
+        dest="number_of_rooms",
+        help="Number of rooms of the property.",
+    )
+
+    parser.add_argument(
+        "--min-price",
+        type=int,
+        required=False,
+        dest="min_price",
+        help="Minimum price of the property.",
+    )
+
+    parser.add_argument(
+        "--max-price",
+        type=int,
+        required=False,
+        dest="max_price",
+        help="Maximum price of the property.",
+    )
+
+    parser.add_argument(
+        "--pages",
+        type=int,
+        required=False,
+        default=1,
+        dest="pages",
+        help="Number of pages to crawl.",
+    )
+
+    parser.add_argument(
+        "-o",
+        "--output-directory",
+        type=str,
+        required=True,
+        dest="output_directory",
+        help="Path to the directory to which the results will be stored.",
+    )
+
+    parser.add_argument(
+        "--cpu", type=int, required=False, default=2, dest="cpu", help="Number of cpu for multiprocessing."
+    )
+
+    args = parser.parse_args()
+
+    return args
+
+
+if __name__ == "__main__":
+
+    args = parse_arguments()
+    main(**vars(args))
