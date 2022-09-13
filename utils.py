@@ -16,7 +16,7 @@ for the main scrapper script.
 import os
 import csv
 from itertools import zip_longest
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse, urljoin, urlencode, parse_qs
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -60,17 +60,6 @@ def write_results_to_file(website: str, scraped_data: dict, output_directory: st
 
     # write results to csv file
     csv_headers = ["Property Type", "Price", "Location", "State", "Description", "Link"]
-
-    # csv_data = [property_types, prices, locations, property_states, property_descriptions, property_links]
-
-    # csv_data = [
-    #     scraped_data["types"],
-    #     scraped_data["prices"],
-    #     scraped_data["locations"],
-    #     scraped_data["states"],
-    #     scraped_data["descriptions"],
-    #     scraped_data["links"],
-    # ]
 
     export_data = zip_longest(*scraped_data, fillvalue="")
 
@@ -127,25 +116,28 @@ def create_sapo_page_url(main_url: str, search_params: dict, num_pages: int):
 
         if search_params["max_price"] is not None:
             # add maximum price
-            page_url = f"{page_url}&gp={search_params['max_price']}"
+            page_url = f"{page_url}&{urlencode({'gp': search_params['max_price']})}"
 
-    # add maximum price if minimum was not provided
-    if search_params["max_price"] is not None:
+    elif search_params["max_price"] is not None:
+        # add maximum price if minimum was not provided
         page_url = urljoin(page_url, f"?gp={search_params['max_price']}")
 
-    page_url_pagination = page_url + "&pn={}"
+    if parse_qs(page_url):
+        # min_price and/or max_price query params were added
+        page_url_pagination = page_url + "&pn={}"
 
-    return page_url_pagination
+        return page_url_pagination
+    else:
+        # query params were not added
+        page_url_pagination = page_url + "?pn={}"
+
+        return page_url_pagination
 
 
 def scrape_sapo(main_url: str, search_params: dict, num_pages: int):
     """Scrape sapo webpage."""
 
-    # page_url = f"{main_url}{search_params['purpose']}-{search_params['type_of_property']}/t{str(search_params['rooms'])}/{search_params['location']}/?lp=50000&gp=200000&pn={str(page)}"
-
     sapo_page_url = create_sapo_page_url(main_url, search_params, num_pages)
-
-    print(sapo_page_url)
 
     sapo_page_contents = crawl(sapo_page_url, num_pages)
 
